@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-[#050816] text-white;
+  font-family: Inter, sans-serif;
+}
+
+* {
+  transition: all 0.2s ease;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+button {
+  transition: all 0.2s ease;
+}
+
+input {
+  transition: all 0.2s ease;
+}
