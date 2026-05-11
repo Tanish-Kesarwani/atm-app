@@ -1,77 +1,126 @@
 import { useState } from "react";
-import API from "../api";
 import { useNavigate } from "react-router-dom";
+import API from "../api";
 
 export default function RegisterPage() {
+  const navigate = useNavigate();
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [pin, setPin] = useState("");
   const [balance, setBalance] = useState("");
-  const [msg, setMsg] = useState("");
-  const [error, setError] = useState("");
 
-  const navigate = useNavigate();
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const register = async () => {
     try {
       setError("");
-      setMsg("");
+      setSuccess("");
+      setLoading(true);
 
       await API.post("/auth/register", {
         name,
         email,
         pin,
-        balance: Number(balance) || 0
+        balance,
       });
 
-      setMsg("Account created successfully");
+      setSuccess("Registration successful. Please login.");
 
-      // optional auto-login
-      const res = await API.post("/auth/login", { email, pin });
-      localStorage.setItem("token", res.data.token);
-      navigate("/dashboard");
+      setTimeout(() => {
+        navigate("/");
+      }, 1500);
 
     } catch (err: any) {
       setError(err?.response?.data?.msg || "Registration failed");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="h-screen flex items-center justify-center">
-      <div className="bg-slate-900 p-8 rounded-xl w-80 shadow-xl">
-        <h2 className="text-xl mb-6 text-center">Create Account</h2>
+    <div className="min-h-screen flex items-center justify-center bg-[#050816] px-6">
+      
+      <div className="bg-white/5 border border-white/10 backdrop-blur-xl p-10 rounded-3xl w-full max-w-md shadow-2xl">
 
-        <input className="w-full p-2 mb-3 bg-slate-800 rounded"
-          placeholder="Name"
-          onChange={(e) => setName(e.target.value)} />
+        {/* HEADER */}
+        <div className="mb-8 text-center">
+          
+          <h1 className="text-3xl font-bold">
+            Create Account
+          </h1>
 
-        <input className="w-full p-2 mb-3 bg-slate-800 rounded"
-          placeholder="Email"
-          onChange={(e) => setEmail(e.target.value)} />
+          <p className="text-gray-400 mt-2">
+            Register for secure ATM access
+          </p>
+        </div>
 
-        <input type="password"
-          className="w-full p-2 mb-3 bg-slate-800 rounded"
-          placeholder="4-digit PIN"
-          onChange={(e) => setPin(e.target.value)} />
-
+        {/* NAME */}
         <input
-          className="w-full p-2 mb-4 bg-slate-800 rounded"
-          placeholder="Initial Balance"
+          className="w-full p-4 mb-4 bg-[#0f172a] rounded-xl outline-none"
+          placeholder="Full Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+
+        {/* EMAIL */}
+        <input
+          className="w-full p-4 mb-4 bg-[#0f172a] rounded-xl outline-none"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+
+        {/* PIN */}
+        <input
+          type="password"
+          maxLength={4}
+          className="w-full p-4 mb-4 bg-[#0f172a] rounded-xl outline-none"
+          placeholder="4-digit PIN"
+          value={pin}
+          onChange={(e) => setPin(e.target.value)}
+        />
+
+        {/* INITIAL BALANCE */}
+        <input
+          type="number"
+          className="w-full p-4 mb-6 bg-[#0f172a] rounded-xl outline-none"
+          placeholder="Initial Amount"
+          value={balance}
           onChange={(e) => setBalance(e.target.value)}
         />
 
+        {/* BUTTON */}
         <button
           onClick={register}
-          className="w-full bg-green-500 py-2 rounded hover:bg-green-600"
+          disabled={loading}
+          className={`w-full py-4 rounded-xl font-semibold ${
+            loading
+              ? "bg-gray-600"
+              : "bg-green-500 hover:bg-green-600"
+          }`}
         >
-          Register
+          {loading ? "Creating Account..." : "Register"}
         </button>
 
-        {/* SUCCESS / ERROR MESSAGES */}
-        {msg && <p className="text-green-400 mt-3 text-sm">{msg}</p>}
-        {error && <p className="text-red-400 mt-3 text-sm">{error}</p>}
+        {/* SUCCESS */}
+        {success && (
+          <p className="text-green-400 mt-4 text-center">
+            {success}
+          </p>
+        )}
 
-        <p className="text-sm text-center mt-4 text-gray-400">
+        {/* ERROR */}
+        {error && (
+          <p className="text-red-400 mt-4 text-center">
+            {error}
+          </p>
+        )}
+
+        {/* LOGIN LINK */}
+        <p className="text-sm text-center mt-6 text-gray-400">
           Already registered?{" "}
           <span
             className="text-green-400 cursor-pointer"
